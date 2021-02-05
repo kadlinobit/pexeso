@@ -5,52 +5,11 @@ Please, copy this code on your website to accredit the author:
 
 import React, { useState, useEffect } from 'react';
 
-import { Card, Container, Rail, Segment } from 'semantic-ui-react';
+import { Card, Container, Grid, Segment, Divider } from 'semantic-ui-react';
 
+import { initDeck, initScoreBoard } from 'helpers';
 import useWindowDimensions from 'hooks/useWindowDimensions';
 import MemCard from 'components/MemCard';
-
-
-
-const images = [];
-
-for (let i=1; i<13; i++) {
-    images.push(`${process.env.PUBLIC_URL}/img/animal-${i}.png`);
-}
-
-const initScoreBoard = (playerCount) => {
-    const scoreBoard = [];
-    
-    for (let i=0; i<playerCount; i++) { scoreBoard.push(0); }
-    return(scoreBoard);
-}
-
-const initDeck = (size) => {
-    const newGame = []
-    
-    for (let i = 0; i < size / 2; i++) {
-      const firstOption = {
-        id: 2 * i,
-        imageId: i,
-        image: images[i],
-        flipped: false,
-      }
-      const secondOption = {
-        id: 2 * i + 1,
-        imageId: i,
-        image: images[i],
-        flipped: false,
-      }
-
-      newGame.push(firstOption)
-      newGame.push(secondOption)
-    }
-
-    const shuffledGame = newGame.sort(() => Math.random() - 0.5);
-    return shuffledGame;
-
-}
-
 
 const Game = ({ playerCount, size }) => {
     const [scoreBoard, setScoreBoard] = useState(() => initScoreBoard(playerCount));
@@ -58,6 +17,7 @@ const Game = ({ playerCount, size }) => {
     const [deck, setDeck] = useState(() => initDeck(size));
     const [flippedImages, setFlippedImages] = useState([]);
     const [flippedCount, setFlippedCount] = useState(() => initScoreBoard(playerCount));
+    const [animateWin, setAnimateWin] = useState(true);
 
     const { width, height } = useWindowDimensions();
     const [containerWidth, setContainerWidth] = useState(height);
@@ -70,13 +30,15 @@ const Game = ({ playerCount, size }) => {
             });
             setDeck(newState);
             setFlippedImages([...flippedImages, imageId]);
+            setFlippedCount( prevFlippedCount => prevFlippedCount.map((count, i) => i === player ? count + 1 : count)); 
         } 
-        setFlippedCount( prevFlippedCount => prevFlippedCount.map((count, i) => i === player ? count + 1 : count)); 
     }
     
     // Set container width according to screen height
     useEffect(() => {
-        setContainerWidth(height - 70);
+        const ratio = size[0] / size[1];
+        let maxWidth = Math.floor(ratio*height - (ratio * 200));
+        setContainerWidth(maxWidth);
     }, [width, height]);
 
     useEffect(() => {
@@ -99,45 +61,58 @@ const Game = ({ playerCount, size }) => {
                 else {
                     setScoreBoard( prevScoreBoard => prevScoreBoard.map((score, i) => i === player ? score + 1 : score)); 
                 }                          
-            }, 2000);    
+            }, 1500);    
             
         }
     }, [flippedImages, playerCount, player]);
 
+    useEffect(() => {
+        if (flippedImages.length === 2 && flippedImages[0] === flippedImages[1]) {
+            setAnimateWin(prevAnimateWin => !prevAnimateWin);
+        }
+
+    },[flippedImages])
+
     return (    
-        <Container style={{ width: `${containerWidth}px` }}>
-            <Segment>
-                <Rail close="very" position={ width > height ? 'left' : 'bottom'}>
+        <>
+            <Segment inverted>
+            <Container>
+                <Grid columns={ playerCount }>
                 {
                     scoreBoard.map((score, i) => {
                         return (
-                            <Segment inverted={ player === i } color={ player === i ? 'green' : 'grey'}>
-                                <h3>{`Player ${i+1}`}</h3>
-                                <div>{`Score: ${score}`}</div>
-                                <div>{`Flipped cards: ${flippedCount[i]}`}</div>
-                            </Segment>
+                            <Grid.Column>
+                                <Segment inverted={ player === i } color={ player === i ? 'green' : 'red'}>
+                                    <h3>{`Player ${i+1}`}</h3>
+                                    <div>{`Score: ${score}`}</div>
+                                    <div>{`Flipped cards: ${flippedCount[i]}`}</div>
+                                </Segment>
+                            </Grid.Column>
                         );
                     })
                 }
-                </Rail>
-                <Card.Group itemsPerRow={4}>
-                    {
-                        deck.map(card => {
-                            return (
-                                <MemCard key={ card.id } card={ card } onCardClick={ onCardClick } />
-                            )
-                        })
-                    }
-                </Card.Group>
+                </Grid>
+            </Container>
             </Segment>
-        </Container>
-       
+            <Divider hidden />
+            <Container style={{ width: `${containerWidth}px` }}>
+                    <Card.Group itemsPerRow={ size[0] }>
+                        {
+                            deck.map(card => {
+                                return (
+                                    <MemCard key={ card.id } card={ card } onCardClick={ onCardClick } animateWin={ animateWin } />
+                                )
+                            })
+                        }
+                    </Card.Group>
+            </Container>
+        </>
     );
 }
 
 Game.defaultProps = {
-    playerCount: 3, 
-    size: 16
+    playerCount: 2, 
+    size: [4,3]
 }
 
 export default Game;
