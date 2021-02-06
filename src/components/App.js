@@ -20,9 +20,9 @@ const renderApp = (gamePhase) => {
 
 const App = () => {
 
-    const [gamePhase, setGamePhase] = useState(0);
+    const [gamePhase, setGamePhase] = useState(1);
 
-    return renderApp();
+    return renderApp(gamePhase);
 }
 
 export default App;
