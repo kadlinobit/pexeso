@@ -6,7 +6,7 @@ export const initImages = () => {
     const images = [];
     
     for (let i=1; i<13; i++) {
-        images.push(`${process.env.PUBLIC_URL}/img/animal-${i}.png`);
+        images.push(new Image().src = `${process.env.PUBLIC_URL}/img/animal-${i}.png`);
     }
 
     return images.sort(() => Math.random() - 0.5);
