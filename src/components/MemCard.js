@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 //import { useSpring, animated as a } from "react-spring";
 import { Card, Transition, Image } from 'semantic-ui-react';
 
 const MemCard = ({ card, onCardClick, animateWin }) => {
 
     const { id, image, imageId } = card;
-    const animation = 'horizontal flip';
-    const duration = 500;
-    const visible = true;
 
     return (
         <Transition animation='jiggle' duration={500} visible={ animateWin } >

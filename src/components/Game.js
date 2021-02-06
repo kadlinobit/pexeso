@@ -13,12 +13,13 @@ import MemCard from 'components/MemCard';
 
 const Game = ({ playerCount, size }) => {
     const [scoreBoard, setScoreBoard] = useState(() => initScoreBoard(playerCount));
+    const [flippedCount, setFlippedCount] = useState(() => initScoreBoard(playerCount));
     const [player, setPlayer] = useState(0);
     const [deck, setDeck] = useState(() => initDeck(size));
     const [flippedImages, setFlippedImages] = useState([]);
-    const [flippedCount, setFlippedCount] = useState(() => initScoreBoard(playerCount));
     const [animateWin, setAnimateWin] = useState(true);
 
+    // Tools for calculating container width
     const { width, height } = useWindowDimensions();
     const [containerWidth, setContainerWidth] = useState(height);
     
@@ -39,10 +40,10 @@ const Game = ({ playerCount, size }) => {
         const ratio = size[0] / size[1];
         let maxWidth = Math.floor(ratio*height - (ratio * 200));
         setContainerWidth(maxWidth);
-    }, [width, height]);
+    }, [width, height, size]);
 
-    useEffect(() => {
-        
+    // Main useEffect for controlling the game mechanism.
+    useEffect(() => {    
         if (flippedImages.length === 2) {
             
             setTimeout(() => {
@@ -76,23 +77,23 @@ const Game = ({ playerCount, size }) => {
     return (    
         <>
             <Segment inverted>
-            <Container>
-                <Grid columns={ playerCount }>
-                {
-                    scoreBoard.map((score, i) => {
-                        return (
-                            <Grid.Column>
-                                <Segment inverted={ player === i } color={ player === i ? 'green' : 'red'}>
-                                    <h3>{`Player ${i+1}`}</h3>
-                                    <div>{`Score: ${score}`}</div>
-                                    <div>{`Flipped cards: ${flippedCount[i]}`}</div>
-                                </Segment>
-                            </Grid.Column>
-                        );
-                    })
-                }
-                </Grid>
-            </Container>
+                <Container>
+                    <Grid columns={ playerCount }>
+                    {
+                        scoreBoard.map((score, i) => {
+                            return (
+                                <Grid.Column>
+                                    <Segment inverted={ player === i } color={ player === i ? 'green' : 'red'}>
+                                        <h3>{`Player ${i+1}`}</h3>
+                                        <div>{`Score: ${score}`}</div>
+                                        <div>{`Flipped cards: ${flippedCount[i]}`}</div>
+                                    </Segment>
+                                </Grid.Column>
+                            );
+                        })
+                    }
+                    </Grid>
+                </Container>
             </Segment>
             <Divider hidden />
             <Container style={{ width: `${containerWidth}px` }}>
