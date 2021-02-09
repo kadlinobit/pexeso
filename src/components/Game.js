@@ -1,17 +1,12 @@
-/* 
-Please, copy this code on your website to accredit the author:
-<a href="http://www.freepik.com">Designed by pch.vector / Freepik</a>
-*/
-
 import React, { useState, useEffect } from 'react';
-
-import { Card, Container, Grid, Segment, Divider } from 'semantic-ui-react';
-
+import { Container, Grid, Segment, Divider } from 'semantic-ui-react';
 import { initDeck, initScoreBoard } from 'helpers';
 import useWindowDimensions from 'hooks/useWindowDimensions';
 import MemCard from 'components/MemCard';
+import ScoreBoard from 'components/ScoreBoard';
 
-const Game = ({ playerCount, size }) => {
+const Game = ({ playerCount, playerNames, size, onGameEnd }) => {
+    
     const [scoreBoard, setScoreBoard] = useState(() => initScoreBoard(playerCount));
     const [flippedCount, setFlippedCount] = useState(() => initScoreBoard(playerCount));
     const [player, setPlayer] = useState(0);
@@ -67,37 +62,41 @@ const Game = ({ playerCount, size }) => {
         }
     }, [flippedImages, playerCount, player]);
 
+    // Matching cards animation
     useEffect(() => {
         if (flippedImages.length === 2 && flippedImages[0] === flippedImages[1]) {
-            setAnimateWin(prevAnimateWin => !prevAnimateWin);
+            setTimeout(() => {
+                setAnimateWin(prevAnimateWin => !prevAnimateWin);  
+            }, 500);      
         }
-
     },[flippedImages])
+
+    // Checking for the end of the game
+    useEffect(() => {
+        const totalScore = scoreBoard.reduce((a, b) => a + b, 0);
+        if(totalScore === size[0]*size[1]/2) {
+            onGameEnd(scoreBoard, flippedCount);
+        }
+    },[scoreBoard, flippedCount, size, onGameEnd]);
+
 
     return (    
         <>
             <Segment inverted>
                 <Container>
-                    <Grid columns={ playerCount }>
-                    {
-                        scoreBoard.map((score, i) => {
-                            return (
-                                <Grid.Column>
-                                    <Segment inverted={ player === i } color={ player === i ? 'green' : 'red'}>
-                                        <h3>{`Player ${i+1}`}</h3>
-                                        <div>{`Score: ${score}`}</div>
-                                        <div>{`Flipped cards: ${flippedCount[i]}`}</div>
-                                    </Segment>
-                                </Grid.Column>
-                            );
-                        })
-                    }
-                    </Grid>
+                    <ScoreBoard
+                        columns={ playerCount } 
+                        playerCount={ playerCount } 
+                        playerNames={ playerNames }
+                        flippedCount={ flippedCount }
+                        scoreBoard={ scoreBoard } 
+                        player={ player } 
+                    />
                 </Container>
             </Segment>
             <Divider hidden />
             <Container style={{ width: `${containerWidth}px` }}>
-                    <Card.Group itemsPerRow={ size[0] }>
+                    <Grid columns={ width >= height ? size[0] : size[1] }>
                         {
                             deck.map(card => {
                                 return (
@@ -105,7 +104,7 @@ const Game = ({ playerCount, size }) => {
                                 )
                             })
                         }
-                    </Card.Group>
+                    </Grid>
             </Container>
         </>
     );
@@ -113,7 +112,8 @@ const Game = ({ playerCount, size }) => {
 
 Game.defaultProps = {
     playerCount: 2, 
-    size: [4,3]
+    size: [4,3],
+    onGameEnd: () => console.log('Game is over')
 }
 
 export default Game;

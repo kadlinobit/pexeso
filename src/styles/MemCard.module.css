@@ -1,0 +1,14 @@
+.hidden {
+    display: none;
+}
+
+.memCard {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-top: 100%;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, .2);
+    background-size: cover;
+    will-change: transform, opacity;
+}
